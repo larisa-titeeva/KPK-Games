@@ -33,28 +33,28 @@ void BallDraw(int x, int y, int vx, int vy, int dt, COLORREF OutLine, COLORREF B
         x += vx * dt;
         y += vy * dt;
 
-        if (x > 890)
+        if (x > 880)
             {
             vx = -vx;
-            x = 1780 - x;
+            x = 1760 - x;
             }
 
-        if (y > 490)
+        if (y > 480)
             {
             vy = -vy;
-            y = 980 - y;
+            y = 960 - y;
             }
 
-        if (x < 110)
+        if (x < 120)
             {
             vx = -vx;
-            x = 220 - x;
+            x = 240 - x;
             }
 
-        if (y < 110)
+        if (y < 120)
             {
             vy = -vy;
-            y = 220 - y;
+            y = 240 - y;
             }
         txSleep (10);
         }
