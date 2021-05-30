@@ -1,14 +1,16 @@
 #include "TXLib.h"
 
 void BackgroundDraw();
-void BallDraw();
+void BallMove();
+void BallDraw (int x, int y, int vx, int vy, int ax, int ay, int r, COLORREF color, COLORREF fillcolor);
+void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int dt);
 
 int main()
     {
     txCreateWindow (1000, 600);
 
     BackgroundDraw();
-    BallDraw();
+    BallMove();
 
     return 0;
     }
@@ -22,84 +24,77 @@ void BackgroundDraw()
 
     }
 
-void BallDraw()
+void BallMove()
     {
     int x1 = 200, y1 = 300,
        vx1 = 4,  vy1 = 3,
+       ax1 = 0,  ay1 = 0,
         r1 = 10;
 
     int x2 = 500, y2 = 160,
        vx2 = 6,  vy2 = 4,
-        r2 = 20;
+       ax2 = 0,  ay2 = 1,
+        r2 = 10;
+
+    int x3 = 300, y3 = 350,
+       vx3 = 2,  vy3 = 4,
+       ax3 = 0,  ay3 = 0,
+        r3 = 15;
 
     int dt = 1;
 
-
     while  (!txGetAsyncKeyState (VK_ESCAPE))
         {
-        txSetColor     (TX_PINK);
-        txSetFillColor (TX_RED);
-        txCircle (x1, y1, r1);
+        BallDraw (x1, y1, vx1, vy1, ax1, ay1, r1, TX_LIGHTGREEN, TX_GREEN);
+        BallDraw (x2, y2, vx2, vy2, ax2, ay2, r2, TX_LIGHTBLUE, TX_BLUE);
+        BallDraw (x3, y3, vx3, vy3, ax3, ay3, r3, TX_LIGHTRED, TX_RED);
 
-        txSetColor     (TX_LIGHTBLUE);
-        txSetFillColor (TX_BLUE);
-        txCircle (x2, y2, r2);
-
-        x1 += vx1 * dt;
-        y1 += vy1 * dt;
-
-        x2 += vx2 * dt;
-        y2 += vy2 * dt;
-
-        if (x1 > (900 - r1))
-            {
-            vx1 = -vx1;
-            x1  = 2 * (900 - r1) - x1;
-            }
-
-        if (y1 > (500 - r1))
-            {
-            vy1 = -vy1;
-            y1  = 2 * (500 - r1) - y1;
-            }
-
-        if (x1 < (100 + r1))
-            {
-            vx1 = -vx1;
-            x1  = 2 * (100 + r1) - x1;
-            }
-
-        if (y1 < (100 + r1))
-            {
-            vy1 = -vy1;
-            y1  = 2 * (100 + r1) - y1;
-            }
-
-        if (x2 > (900 - r2))
-            {
-            vx2 = -vx2;
-            x2  = 2 * (900 - r2) - x2;
-            }
-
-        if (y2 > (500 - r2))
-            {
-            vy2 = -vy2;
-            y2  = 2 * (500 - r2) - y2;
-            }
-
-        if (x2 < (100 + r2))
-            {
-            vx2 = -vx2;
-            x2  = 2 * (100 + r2) - x2;
-            }
-
-        if (y2 < (100 + r2))
-            {
-            vy2 = -vy2;
-            y2  = 2 * (100 + r2) - y2;
-            }
+        PhysicsBall (&x1, &y1, &vx1, &vy1, ax1, ay1, r1, dt);
+        PhysicsBall (&x2, &y2, &vx2, &vy2, ax2, ay2, r2, dt);
+        PhysicsBall (&x3, &y3, &vx3, &vy3, ax3, ay3, r3, dt);
 
         txSleep (10);
+        }
+    }
+
+void BallDraw(int x, int y, int vx, int vy, int ax, int ay, int r, COLORREF color, COLORREF fillcolor)
+    {
+    txSetColor     (color);
+    txSetFillColor (fillcolor);
+
+    txCircle (x, y, r);
+    }
+
+void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int dt)
+    {
+    *x += *vx * dt;
+    *y += *vy * dt;
+
+    *vx += ax * dt;
+    *vy += ay * dt;
+
+    if (*x > (900 - r))
+        {
+        *vx = - *vx;
+        *x  = 2 * (900 - r) - *x;
+        }
+
+    if (*y > (500 - r))
+        {
+        *vy = - *vy;
+        *y  = 2 * (500 - r) - *y;
+        }
+
+    if (*x < (100 + r))
+        {
+        *vx = - *vx;
+        *x  = 2 * (100 + r) - *x;
+        }
+
+    if (*y < (100 + r))
+        {
+        *vy = - *vy;
+        *y  = 2 * (100 + r) - *y;
         }
     }
 
