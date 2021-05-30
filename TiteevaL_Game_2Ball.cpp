@@ -2,7 +2,8 @@
 
 void BackgroundDraw();
 void BallMove();
-void BallDraw (int x, int y, int vx, int vy, int ax, int ay, int r, COLORREF color, COLORREF fillcolor);
+void TextDraw    (int x);
+void BallDraw    (int x, int y, int vx, int vy, int ax, int ay, int r, COLORREF color, COLORREF fillcolor);
 void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int dt);
 
 int main()
@@ -53,6 +54,7 @@ void BallMove()
         PhysicsBall (&x2, &y2, &vx2, &vy2, ax2, ay2, r2, dt);
         PhysicsBall (&x3, &y3, &vx3, &vy3, ax3, ay3, r3, dt);
 
+        TextDraw (x1);
         txSleep (10);
         }
     }
@@ -98,3 +100,14 @@ void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int d
         }
     }
 
+void TextDraw (int x)
+    {
+    char strX[10] = "";
+    sprintf (strX, "x = %d", x);
+
+    txSetColor (TX_GREEN);
+    txSetFillColor (TX_BLACK);
+    txRectangle (0, 0, 100, 100);
+
+    txTextOut (10, 50, strX);
+    }
