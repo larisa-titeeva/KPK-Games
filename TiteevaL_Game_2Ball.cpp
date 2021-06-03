@@ -3,30 +3,24 @@
 void BackgroundDraw();
 void BallMove();
 void TextDraw    (int r1, int r2, double d, int *count);
-void BallDraw    (int x, int y, int r, COLORREF color, COLORREF fillcolor);
+void BallDraw    (int  x, int  y, int r, COLORREF color, COLORREF fillcolor);
+
 void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int dt);
-void BallsCollision (int x1, int x2, int y1, int y2, int* vx1, int* vx2, int* vy1, int* vy2, int r1, int r2,
-                     int* dx, int* dy, double* d, int* sinA, int* cosA,
-                     int* vn1, int* vn2, int* vt1, int* vt2, int* exchange);
+
+void BallsCollision (int  x1,  int   x2, int y1,    int y2,    int* vx1,
+                     int* vx2, int* vy1, int* vy2,  int r1,    int r2,
+                     int* dx,  int*  dy, double* d, int* sinA, int* cosA,
+                     int* vn1, int* vn2, int* vt1,  int* vt2,  int* exc);
 
 int main()
     {
     txCreateWindow (1000, 600);
 
-    BackgroundDraw();
     BallMove();
 
     return 0;
     }
 
-void BackgroundDraw()
-    {
-    txSetColor     (TX_BLUE, 5);
-    txSetFillColor (TX_BLACK);
-
-    txRectangle (100, 100, 900, 500);
-
-    }
 
 void BallMove()
     {
@@ -43,24 +37,25 @@ void BallMove()
     int dt = 1;
     int count = 0;
 
-    int dx, dy;
-    double  d;
+    int dx, dy; double  d;
     int sinA, cosA;
 
-    int vn1, vn2, vt1, vt2, exchange;
+    int vn1, vn2, vt1, vt2, exc;
 
-    while  (!txGetAsyncKeyState (VK_ESCAPE))
+    while (!txGetAsyncKeyState (VK_ESCAPE))
         {
         txClear();
         BallDraw (x1, y1, r1, TX_LIGHTGREEN, TX_GREEN);
-        BallDraw (x2, y2, r2, TX_LIGHTBLUE, TX_BLUE);
+        BallDraw (x2, y2, r2, TX_LIGHTBLUE,  TX_BLUE);
 
         PhysicsBall (&x1, &y1, &vx1, &vy1, ax1, ay1, r1, dt);
         PhysicsBall (&x2, &y2, &vx2, &vy2, ax2, ay2, r2, dt);
 
         BallsCollision (x1, x2, y1, y2, &vx1, &vx2, &vy1, &vy2, r1, r2,
-        &dx, &dy, &d, &sinA, &cosA, &vn1, &vn2, &vt1, &vt2, &exchange);
+                        &dx, &dy, &d, &sinA, &cosA, &vn1, &vn2, &vt1, &vt2, &exc);
+
         TextDraw (r1, r2, d, &count);
+
         txSleep (10);
         }
     }
@@ -96,20 +91,20 @@ void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int d
     if (*x < (0 + r))
         {
         *vx = - *vx;
-        *x  = 2 * (0 + r) - *x;
+        *x  = 2 * r - *x;
         }
 
     if (*y < (0 + r))
         {
         *vy = - *vy;
-        *y  = 2 * (0 + r) - *y;
+        *y  = 2 * r - *y;
         }
-
     }
 
 void TextDraw (int r1, int r2, double d, int *count)
     {
     char strCount[10] = "";
+
     if (d < (r1 + r2))
         {
         *count = *count + 1;
@@ -124,18 +119,15 @@ void TextDraw (int r1, int r2, double d, int *count)
     txTextOut (10, 50, strCount);
     }
 
-void BallsCollision (int x1, int x2, int y1, int y2, int* vx1, int* vx2, int* vy1, int* vy2, int r1, int r2,
-                     int* dx, int* dy, double* d, int* sinA, int* cosA,
-                     int* vn1, int* vn2, int* vt1, int* vt2, int* exchange)
+void BallsCollision (int  x1,  int   x2, int y1,    int y2,    int* vx1,
+                     int* vx2, int* vy1, int* vy2,  int r1,    int r2,
+                     int* dx,  int*  dy, double* d, int* sinA, int* cosA,
+                     int* vn1, int* vn2, int* vt1,  int* vt2,  int* exc)
     {
     *dx = x1 - x2;
     *dy = y1 - y2;
-    *d = sqrt (*dx * *dx +* dy * *dy);
+    *d  = sqrt ((*dx) * (*dx) + (*dy) * (*dy));
 
-    if (*d == 0)
-        {
-        *d == 0.01;
-        }
     *sinA = ROUND (*dx / *d);
     *cosA = ROUND (*dy / *d);
 
@@ -146,14 +138,13 @@ void BallsCollision (int x1, int x2, int y1, int y2, int* vx1, int* vx2, int* vy
         *vt1 = -(*vx2) * (*cosA) + (*vy2) * (*sinA);
         *vt2 = -(*vx1) * (*cosA) + (*vy1) * (*sinA);
 
-
-        *exchange = *vn1;
+        *exc = *vn1;
         *vn1 = *vn2;
-        *vn2 = *exchange;
+        *vn2 = *exc;
 
-        *vx1 = *vn2* *sinA - *vt2* *cosA;
-        *vy1 = *vn2* *cosA + *vt2* *sinA;
-        *vx2 = *vn1* *sinA - *vt1* *cosA;
-        *vy2 = *vn1* *cosA + *vt1* *sinA;
+        *vx1 = (*vn2) * (*sinA) - (*vt2) * (*cosA);
+        *vy1 = (*vn2) * (*cosA) + (*vt2) * (*sinA);
+        *vx2 = (*vn1) * (*sinA) - (*vt1) * (*cosA);
+        *vy2 = (*vn1) * (*cosA) + (*vt1) * (*sinA);
         }
     }
