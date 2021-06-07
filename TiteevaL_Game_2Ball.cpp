@@ -2,6 +2,7 @@
 
 void BackgroundDraw();
 void BallMove();
+void BallControl(int* vxA, int* vyA);
 bool Collision (int xA, int yA, int xB, int yB, int rA, int rB);
 void BallDraw    (int  x, int  y, int r, COLORREF color, COLORREF fillcolor);
 
@@ -50,6 +51,8 @@ void BallMove()
         PhysicsBall (&x1, &y1, &vx1, &vy1, ax1, ay1, r1, dt);
         PhysicsBall (&x2, &y2, &vx2, &vy2, ax2, ay2, r2, dt);
         PhysicsBall (&x3, &y3, &vx3, &vy3, ax3, ay3, r3, dt);
+
+        BallControl(&vx1, &vy1);
 
 // в поисках функции по уменьшению количества "if"
         if (Collision (x1, y1, x2, y2, r1, r2))
@@ -111,6 +114,13 @@ void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int d
         }
     }
 
+void BallControl(int* vxA, int* vyA)
+    {
+    if (txGetAsyncKeyState (VK_UP))    *vyA +=1;
+    if (txGetAsyncKeyState (VK_DOWN))  *vyA -=1;
+    if (txGetAsyncKeyState (VK_LEFT))  *vxA -=1;
+    if (txGetAsyncKeyState (VK_RIGHT)) *vxA +=1;
+    }
 
 void BallsCollision (int  xA,  int   xB, int yA,    int yB,    int* vxA,
                      int* vxB, int* vyA, int* vyB)
