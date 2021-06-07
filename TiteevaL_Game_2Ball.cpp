@@ -7,8 +7,8 @@ void BallDraw    (int  x, int  y, int r, COLORREF color, COLORREF fillcolor);
 
 void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int dt);
 
-void BallsCollision (int  x1,  int   x2, int y1,    int y2,    int* vx1,
-                     int* vx2, int* vy1, int* vy2,  int r1,    int r2);
+void BallsCollision (int  xA,  int   xB, int yA,    int yB,    int* vxA,
+                     int* vxB, int* vyA, int* vyB);
 
 int main()
     {
@@ -22,19 +22,19 @@ int main()
 void BallMove()
     {
     int x1 = 200, y1 = 300,
-       vx1 = 4,  vy1 = 3,
+       vx1 = 2,  vy1 = 1,
        ax1 = 0,  ay1 = 0,
-        r1 = 80;
+        r1 = 40;
 
     int x2 = 500, y2 = 160,
-       vx2 = 3,  vy2 = 4,
+       vx2 = 2,  vy2 = 1,
        ax2 = 0,  ay2 = 0,
-        r2 = 80;
+        r2 = 40;
 
     int x3 = 600, y3 = 60,
-       vx3 = 3,  vy3 = -2,
+       vx3 = -1,  vy3 = -2,
        ax3 = 0,  ay3 = 0,
-        r3 = 80;
+        r3 = 40;
 
     int dt = 1;
     HDC Background  = txLoadImage ("images\\phon.bmp");
@@ -51,10 +51,20 @@ void BallMove()
         PhysicsBall (&x2, &y2, &vx2, &vy2, ax2, ay2, r2, dt);
         PhysicsBall (&x3, &y3, &vx3, &vy3, ax3, ay3, r3, dt);
 
+// в поисках функции по уменьшению количества "if"
         if (Collision (x1, y1, x2, y2, r1, r2))
             {
-            BallsCollision (x1, x2, y1, y2, &vx1, &vx2, &vy1, &vy2, r1, r2);
+            BallsCollision (x1, x2, y1, y2, &vx1, &vx2, &vy1, &vy2);
             }
+        if (Collision (x1, y1, x3, y3, r1, r3))
+            {
+            BallsCollision (x1, x3, y1, y3, &vx1, &vx3, &vy1, &vy3);
+            }
+        if (Collision (x3, y3, x2, y2, r3, r2))
+            {
+            BallsCollision (x3, x2, y3, y2, &vx3, &vx2, &vy3, &vy2);
+            }
+
         txSleep (10);
         }
     txDeleteDC (Background);
@@ -102,26 +112,26 @@ void PhysicsBall (int* x, int* y, int* vx, int* vy, int ax, int ay, int r, int d
     }
 
 
-void BallsCollision (int  x1,  int   x2, int y1,    int y2,    int* vx1,
-                     int* vx2, int* vy1, int* vy2,  int r1,    int r2)
+void BallsCollision (int  xA,  int   xB, int yA,    int yB,    int* vxA,
+                     int* vxB, int* vyA, int* vyB)
     {
-    int dx = x1 - x2, dy = y1 - y2;
+    int dx = xA - xB, dy = yA - yB;
     int sinA = ROUND (dx / sqrt (dx * dx + dy * dy));
     int cosA = ROUND (dy / sqrt (dx * dx + dy * dy));
 
-    int vn1 =  (*vx2) * sinA + (*vy2) * cosA;
-    int vn2 =  (*vx1) * sinA + (*vy1) * cosA;
-    int vt1 = -(*vx2) * cosA + (*vy2) * sinA;
-    int vt2 = -(*vx1) * cosA + (*vy1) * sinA;
+    int vnA =  (*vxB) * sinA + (*vyB) * cosA;
+    int vnB =  (*vxA) * sinA + (*vyA) * cosA;
+    int vtA = -(*vxB) * cosA + (*vyB) * sinA;
+    int vtB = -(*vxA) * cosA + (*vyA) * sinA;
 
-    int exc = vn1;
-    vn1 = vn2;
-    vn2 = exc;
+    int exc = vnA;
+    vnA = vnB;
+    vnB = exc;
 
-    *vx1 = vn2 * sinA - vt2 * cosA;
-    *vy1 = vn2 * cosA + vt2 * sinA;
-    *vx2 = vn1 * sinA - vt1 * cosA;
-    *vy2 = vn1 * cosA + vt1 * sinA;
+    *vxA = vnB * sinA - vtB * cosA;
+    *vyA = vnB * cosA + vtB * sinA;
+    *vxB = vnA * sinA - vtA * cosA;
+    *vyB = vnA * cosA + vtA * sinA;
     }
 
 bool Collision (int xA, int yA, int xB, int yB, int rA, int rB)
