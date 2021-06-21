@@ -10,25 +10,27 @@ struct Pig
 void BirdDraw    (double x, double y, double Size);
 void PigDraw     (double x, double y, double Size);
 
-void PhysicsBird (double* x, double* y, double* vx, double* vy, int ay, int dt, double Size);
+void BirdControl (double* vx, double* vy);
+
+void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size);
 void PhysicsPig  (double* x, double* y, double* vx, double* vy, int ay, int dt, double Size);
 
-void BirdMove();
+void GameMove();
 
 
 
 int main ()
     {
     txCreateWindow (1000, 600);
-    BirdMove();
+    GameMove();
     return 0;
     }
 
-void BirdMove()
+void GameMove()
     {
-    double x = 270, y = 270,
+    double x = 100, y = 500,
        vx = 0,  vy = 0;
-    int Size = 1;
+    double Size = 0.5;
     int ay = 1;
     int dt = 1;
 
@@ -37,30 +39,47 @@ void BirdMove()
 
     HDC Background  = txLoadImage ("images\\phon.bmp");
 
+    while (!txGetAsyncKeyState (VK_LMENU))
+        {
+        txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
+
+        BirdDraw (x, y, Size);
+
+        PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
+        PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
+
+        BirdControl(&vx, &vy);
+
+        txSleep (10);
+        }
+
     while (!txGetAsyncKeyState (VK_ESCAPE))
         {
         txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
 
         BirdDraw (x, y, Size);
+
         PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
         PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
-        PhysicsBird (&x, &y, &vx, &vy, ay, dt, Size);
+
+        PhysicsBird (&x, &y, &vx, &vy, &ay, dt, Size);
+
         txSleep (10);
         }
     txDeleteDC (Background);
     }
 
-void PhysicsBird (double* x, double* y, double* vx, double* vy, int ay, int dt, double Size)
+void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size)
     {
-    *vy += ay * dt;
+    *vy += *ay * dt;
 
     *x += *vx * dt;
     *y += *vy * dt;
 
-    *vx = (*vx) * 0.99;  // Ã³Ä›ÄºÃ­Ã¼Å™ÄºÃ­ÄÄº ÄÃ® 0X Ã¢Å„ÄºÄƒÃ¤Å• Ã§Å• Å„Ã·ÄºÅˆ Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•
-    *vy = (*vy) * 0.99;  // Ã³Ä›ÄºÃ­Ã¼Å™ÄºÃ­ÄÄº ÄÃ® 0Y
-    // ÄÄ‘Ä ÄÃ®Ã«ÄºÅˆÄº Ã¢Ã¢ÄºÄ‘Å‘ Ã§Å•Ä›ÄºÃ¤Ã«Ë™Å£Å¯Å•Ë™ Å„Ã®Å„ÅˆÅ•Ã¢Ã«Ë™Å£Å¯Å•Ë™: ay + a(Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•)
-    // ÄÄ‘Ä ÄÃ®Ã«ÄºÅˆÄº Ã¢Ã­ÄÃ§ Ã³Å„Ä™Ã®Ä‘Ë™Å£Å¯Å•Ë™ Å„Ã®Å„ÅˆÅ•Ã¢Ã«Ë™Å£Å¯Å•Ë™: ay - a(Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•)
+    *vx = (*vx) * 0.99;  // óìåíüøåíèå ïî 0X âñåãäà çà ñ÷åò ñîïðîòèâëåíèÿ âîçäóõà
+    *vy = (*vy) * 0.99;  // óìåíüøåíèå ïî 0Y
+    // ïðè ïîëåòå ââåðõ çàìåäëÿþùàÿ ñîñòàâëÿþùàÿ: ay + a(ñîïðîòèâëåíèÿ âîçäóõà)
+    // ïðè ïîëåòå âíèç óñêîðÿþùàÿ ñîñòàâëÿþùàÿ: ay - a(ñîïðîòèâëåíèÿ âîçäóõà)
 
     if (*x > (1000 - 70*Size))
         {
@@ -84,6 +103,12 @@ void PhysicsBird (double* x, double* y, double* vx, double* vy, int ay, int dt, 
         {
         *vy = - *vy;
         *y  = 2 * 70*Size - *y;
+        }
+
+    if ((*vy > - 0.05) && (*vy < 0.05) && (*y > (600 - 100*Size)))
+        {
+        *ay = 0;
+        *vx = 0;
         }
     }
 
@@ -94,10 +119,10 @@ void PhysicsPig (double* x, double* y, double* vx, double* vy, int ay, int dt, d
     *x += *vx * dt;
     *y += *vy * dt;
 
-    *vx = (*vx) * 0.99;  // Ã³Ä›ÄºÃ­Ã¼Å™ÄºÃ­ÄÄº ÄÃ® 0X Ã¢Å„ÄºÄƒÃ¤Å• Ã§Å• Å„Ã·ÄºÅˆ Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•
-    *vy = (*vy) * 0.99;  // Ã³Ä›ÄºÃ­Ã¼Å™ÄºÃ­ÄÄº ÄÃ® 0Y
-    // ÄÄ‘Ä ÄÃ®Ã«ÄºÅˆÄº Ã¢Ã¢ÄºÄ‘Å‘ Ã§Å•Ä›ÄºÃ¤Ã«Ë™Å£Å¯Å•Ë™ Å„Ã®Å„ÅˆÅ•Ã¢Ã«Ë™Å£Å¯Å•Ë™: ay + a(Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•)
-    // ÄÄ‘Ä ÄÃ®Ã«ÄºÅˆÄº Ã¢Ã­ÄÃ§ Ã³Å„Ä™Ã®Ä‘Ë™Å£Å¯Å•Ë™ Å„Ã®Å„ÅˆÅ•Ã¢Ã«Ë™Å£Å¯Å•Ë™: ay - a(Å„Ã®ÄÄ‘Ã®ÅˆÄÃ¢Ã«ÄºÃ­ÄË™ Ã¢Ã®Ã§Ã¤Ã³Å‘Å•)
+    *vx = (*vx) * 0.99;  // óìåíüøåíèå ïî 0X âñåãäà çà ñ÷åò ñîïðîòèâëåíèÿ âîçäóõà
+    *vy = (*vy) * 0.99;  // óìåíüøåíèå ïî 0Y
+    // ïðè ïîëåòå ââåðõ çàìåäëÿþùàÿ ñîñòàâëÿþùàÿ: ay + a(ñîïðîòèâëåíèÿ âîçäóõà)
+    // ïðè ïîëåòå âíèç óñêîðÿþùàÿ ñîñòàâëÿþùàÿ: ay - a(ñîïðîòèâëåíèÿ âîçäóõà)
 
     if (*x > (1000 - 70*Size))
         {
@@ -123,6 +148,14 @@ void PhysicsPig (double* x, double* y, double* vx, double* vy, int ay, int dt, d
         *y  = 2 * 70*Size - *y;
         }
 
+    }
+
+void BirdControl(double* vx, double* vy)
+    {
+    if (txGetAsyncKeyState (VK_UP))    *vy +=1;
+    if (txGetAsyncKeyState (VK_DOWN))  *vy -=1;
+    if (txGetAsyncKeyState (VK_LEFT))  *vx -=1;
+    if (txGetAsyncKeyState (VK_RIGHT)) *vx +=1;
     }
 
 void BirdDraw (double x, double y, double Size)
