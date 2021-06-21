@@ -55,7 +55,7 @@ void BallMove()
 
         BallControl(&ball1.vx, &ball1.vy);
 
-// в поисках функции по уменьшению количества "if"
+// Гў ГЇГ®ГЁГ±ГЄГ Гµ ГґГіГ­ГЄГ¶ГЁГЁ ГЇГ® ГіГ¬ГҐГ­ГјГёГҐГ­ГЁГѕ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ  "if"
         if (Collision (ball1.x, ball1.y, ball1.r, ball2.x, ball2.y, ball2.r))
             {
             BallsCollision (ball1.x, ball1.y, &ball1.vx, &ball1.vy, ball2.x, ball2.y, &ball2.vx, &ball2.vy);
