@@ -21,6 +21,9 @@ bool WasCollision (double x, double y, double r, double xP, double yP, double rP
 void Collision    (double  x,  double y,  double* vx,  double* vy,
                    double  xP, double yP, double* vxP, double* vyP);
 
+void CursorDraw (int x, int y);
+
+void TitlesBegin();
 void GameMove();
 
 
@@ -29,6 +32,7 @@ int main ()
     {
     txCreateWindow (1000, 600);
 
+    TitlesBegin();
     GameMove();
 
     return 0;
@@ -42,6 +46,7 @@ void GameMove()
     Pig pig2 = {.xP = 400, .yP = 100, .vxP =  0, .vyP =  0, .SizeP = 0.5};
 
     HDC Background  = txLoadImage ("images\\background.bmp");
+
     while (score >= 1)
         {
         double x = 110, y = 400,
@@ -66,7 +71,9 @@ void GameMove()
             TabloScore (&score);
             txSleep (10);
             }
+
         score -= 1;
+        txPlaySound ("sound/birdMove.wav");
 
         while (!txGetAsyncKeyState (VK_ESCAPE))
             {
@@ -331,6 +338,15 @@ void PigDraw (double x, double y, double Size)
     txCircle (x - 6*Size, y + 35*Size, 5*Size);
     }
 
+void CursorDraw (int x, int y)
+    {
+    txSetColor (RGB (100, 0, 0));
+    txSetFillColor (TX_RED);
+    POINT cursor[] ={ {x, y}, {x + 20, y - 20}, {x + 20, y - 10}, {x + 40, y - 10},
+                              {x + 40, y + 10}, {x + 20, y + 10}, {x + 20, y + 20} };
+    txPolygon (cursor, 7);
+    }
+
 void TabloScore (int* score)
     {
     txSetColor(TX_BLACK);
@@ -343,4 +359,33 @@ void TabloScore (int* score)
     txSetColor(TX_BROWN);
     txSelectFont ("Arial Black", 30);
     txTextOut (950, 25, strScore);
+    }
+
+void TitlesBegin()
+    {
+    int x = 620, y = 385;
+
+    txPlaySound ("sound/AngryBirds.wav");
+    HDC BeginTitles  = txLoadImage ("images\\BeginTitles.bmp");
+
+    int t = 0;
+    while (!txGetAsyncKeyState (VK_LMENU))
+        {
+        txBitBlt (txDC(), 0, 0, 1000, 600, BeginTitles, 0, 0);
+        CursorDraw (x, y);
+
+        if ((y == 385) && (txGetAsyncKeyState (VK_DOWN)) )
+            {
+            y = y + 120;
+            }
+        if ((y == 505) && (txGetAsyncKeyState (VK_UP)) )
+            {
+            y = y - 120;
+            }
+        txSleep (50);
+        }
+    //COLORREF color = txFetPixel (x, y);
+
+    txDeleteDC (BeginTitles);
+    txSleep (3000);
     }
