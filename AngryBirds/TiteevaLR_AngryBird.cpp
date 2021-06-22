@@ -34,6 +34,7 @@ int main ()
     return 0;
     }
 
+// разбить на функции???
 void GameMove()
     {
     int score = 5;
@@ -81,6 +82,7 @@ void GameMove()
             PhysicsPig (&pig1.xP, &pig1.yP, &pig1.vxP, &pig1.vyP, &ay, dt, pig1.SizeP);
             PhysicsPig (&pig2.xP, &pig2.yP, &pig2.vxP, &pig2.vyP, &ay, dt, pig2.SizeP);
 
+// если свинок много, уменьшить количество if
             if (WasCollision (x, y, 70*Size, pig1.xP, pig1.yP, 50*pig1.SizeP))
                 {
                 Collision (x, y, &vx, &vy, pig1.xP, pig1.yP, &pig1.vxP, &pig1.vyP);
@@ -90,6 +92,7 @@ void GameMove()
                 Collision (x, y, &vx, &vy, pig2.xP, pig2.yP, &pig2.vxP, &pig2.vyP);
                 }
 
+// остановить игру. исчезновение свинки, с которой столкнулась птичка
             if ((vy > - 0.09) && (vy < 0.09) && (y > (500 - 50*Size)))
                 {
                 break;
@@ -172,6 +175,7 @@ void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt,
         }
     }
 
+// ƒолжны сто€ть на месте до столкновени€
 void PhysicsPig (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size)
     {
     *vy += *ay * dt;
