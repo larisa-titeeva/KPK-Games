@@ -6,14 +6,20 @@ struct Pig
           vxP, vyP;
     double SizeP;
     };
+void TabloScore (int* score);
 
-void BirdDraw    (double x, double y, double Size);
-void PigDraw     (double x, double y, double Size);
+void BirdDraw (double x, double y, double Size);
+void PigDraw  (double x, double y, double Size);
 
-void BirdControl (double* vx, double* vy);
+void BirdSpeed (double* vx, double* vy);
 
 void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size);
-void PhysicsPig  (double* x, double* y, double* vx, double* vy, int ay, int dt, double Size);
+void PhysicsPig  (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size);
+
+bool WasCollision (double x, double y, double r, double xP, double yP, double rP);
+
+void Collision    (double  x,  double y,  double* vx,  double* vy,
+                   double  xP, double yP, double* vxP, double* vyP);
 
 void GameMove();
 
@@ -22,51 +28,105 @@ void GameMove();
 int main ()
     {
     txCreateWindow (1000, 600);
+
     GameMove();
+
     return 0;
     }
 
 void GameMove()
     {
-    double x = 100, y = 500,
-       vx = 0,  vy = 0;
-    double Size = 0.5;
-    int ay = 1;
-    int dt = 1;
+    int score = 5;
+    Pig pig1 = {.xP = 500, .yP = 300, .vxP =  0, .vyP =  0, .SizeP = 1};
+    Pig pig2 = {.xP = 400, .yP = 100, .vxP =  0, .vyP =  0, .SizeP = 0.5};
 
-    Pig pig1 = {.xP = 200, .yP = 300, .vxP =  0, .vyP =  0, .SizeP = 1};
-    Pig pig2 = {.xP = 100, .yP = 100, .vxP =  0, .vyP =  0, .SizeP = 0.5};
-
-    HDC Background  = txLoadImage ("images\\phon.bmp");
-
-    while (!txGetAsyncKeyState (VK_LMENU))
+    HDC Background  = txLoadImage ("images\\background.bmp");
+    while (score >= 1)
         {
-        txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
+        double x = 110, y = 400,
+           vx = 0,  vy = 0;
+        double Size = 0.5;
+        int ay = 1;
+        int dt = 1;
 
-        BirdDraw (x, y, Size);
+        while (!txGetAsyncKeyState (VK_LMENU))
+            {
+            txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
 
-        PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
-        PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
+            BirdDraw (x, y, Size);
 
-        BirdControl(&vx, &vy);
+            PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
+            PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
 
-        txSleep (10);
-        }
+            BirdSpeed(&vx, &vy);
 
-    while (!txGetAsyncKeyState (VK_ESCAPE))
-        {
-        txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
+            txLine (x, y, x + vx, y + vy);
 
-        BirdDraw (x, y, Size);
+            TabloScore (&score);
+            txSleep (10);
+            }
+        score -= 1;
 
-        PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
-        PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
+        while (!txGetAsyncKeyState (VK_ESCAPE))
+            {
+            txBitBlt (txDC(), 0, 0, 1000, 600, Background, 0, 0);
 
-        PhysicsBird (&x, &y, &vx, &vy, &ay, dt, Size);
+            TabloScore (&score);
+            BirdDraw (x, y, Size);
 
-        txSleep (10);
+            PigDraw (pig1.xP, pig1.yP, pig1.SizeP);
+            PigDraw (pig2.xP, pig2.yP, pig2.SizeP);
+
+            PhysicsBird (&x, &y, &vx, &vy, &ay, dt, Size);
+            PhysicsPig (&pig1.xP, &pig1.yP, &pig1.vxP, &pig1.vyP, &ay, dt, pig1.SizeP);
+            PhysicsPig (&pig2.xP, &pig2.yP, &pig2.vxP, &pig2.vyP, &ay, dt, pig2.SizeP);
+
+            if (WasCollision (x, y, 70*Size, pig1.xP, pig1.yP, 50*pig1.SizeP))
+                {
+                Collision (x, y, &vx, &vy, pig1.xP, pig1.yP, &pig1.vxP, &pig1.vyP);
+                }
+            if (WasCollision (x, y, 70*Size, pig2.xP, pig2.yP, 50*pig2.SizeP))
+                {
+                Collision (x, y, &vx, &vy, pig2.xP, pig2.yP, &pig2.vxP, &pig2.vyP);
+                }
+
+            if ((vy > - 0.09) && (vy < 0.09) && (y > (500 - 50*Size)))
+                {
+                break;
+                }
+            txSleep (10);
+            }
         }
     txDeleteDC (Background);
+    txSetColor(TX_MAGENTA);
+    txSelectFont ("Arial Black", 70);
+    txTextOut (100, 350, "GAME OVER");
+    }
+
+void Collision (double  x, double y, double* vx, double* vy, double  xP, double yP, double* vxP, double* vyP)
+    {
+    double dx = x - xP, dy = y - yP;
+    double sinA = dx / sqrt (dx * dx + dy * dy);
+    double cosA = dy / sqrt (dx * dx + dy * dy);
+
+    double vn  =  (*vxP) * sinA + (*vyP) * cosA;
+    double vnP =  (*vx)  * sinA + (*vy)  * cosA;
+    double vt  = -(*vxP) * cosA + (*vyP) * sinA;
+    double vtP = -(*vx)  * cosA + (*vy)  * sinA;
+
+    double exc = vn;
+    vn = vnP;
+    vnP = exc;
+
+    *vx  = vnP * sinA - vtP * cosA;
+    *vy  = vnP * cosA + vtP * sinA;
+    *vxP = vn  * sinA - vt  * cosA;
+    *vyP = vn  * cosA + vt  * sinA;
+    }
+
+bool WasCollision   (double x, double y, double r, double xP, double yP, double rP)
+    {
+    return (sqrt ((x - xP)*(x - xP) + (y - yP)*(y - yP)) <= (r + rP));
     }
 
 void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size)
@@ -87,10 +147,10 @@ void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt,
         *x  = 2 * (1000 - 70*Size) - *x;
         }
 
-    if (*y > (600 - 70*Size))
+    if (*y > (550 - 70*Size))
         {
         *vy = - *vy;
-        *y  = 2 * (600 - 70*Size) - *y;
+        *y  = 2 * (550 - 70*Size) - *y;
         }
 
     if (*x < (0 + 70*Size))
@@ -105,16 +165,16 @@ void PhysicsBird (double* x, double* y, double* vx, double* vy, int* ay, int dt,
         *y  = 2 * 70*Size - *y;
         }
 
-    if ((*vy > - 0.05) && (*vy < 0.05) && (*y > (600 - 100*Size)))
+    if ((*vy > - 0.06) && (*vy < 0.06) && (*y > (550 - 70*Size)))
         {
         *ay = 0;
         *vx = 0;
         }
     }
 
-void PhysicsPig (double* x, double* y, double* vx, double* vy, int ay, int dt, double Size)
+void PhysicsPig (double* x, double* y, double* vx, double* vy, int* ay, int dt, double Size)
     {
-    *vy += ay * dt;
+    *vy += *ay * dt;
 
     *x += *vx * dt;
     *y += *vy * dt;
@@ -124,36 +184,42 @@ void PhysicsPig (double* x, double* y, double* vx, double* vy, int ay, int dt, d
     // при полете вверх замедл€юща€ составл€юща€: ay + a(сопротивлени€ воздуха)
     // при полете вниз ускор€юща€ составл€юща€: ay - a(сопротивлени€ воздуха)
 
-    if (*x > (1000 - 70*Size))
+    if (*x > (1000 - 50*Size))
         {
         *vx = - *vx;
-        *x  = 2 * (1000 - 70*Size) - *x;
+        *x  = 2 * (1000 - 50*Size) - *x;
         }
 
-    if (*y > (600 - 70*Size))
+    if (*y > (560 - 50*Size))
         {
         *vy = - *vy;
-        *y  = 2 * (600 - 70*Size) - *y;
+        *y  = 2 * (560 - 50*Size) - *y;
         }
 
-    if (*x < (0 + 70*Size))
+    if (*x < (0 + 50*Size))
         {
         *vx = - *vx;
-        *x  = 2 * 70*Size - *x;
+        *x  = 2 * 50*Size - *x;
         }
 
-    if (*y < (0 + 70*Size))
+    if (*y < (0 + 50*Size))
         {
         *vy = - *vy;
-        *y  = 2 * 70*Size - *y;
+        *y  = 2 * 50*Size - *y;
+        }
+
+     if ((*vy > - 0.06) && (*vy < 0.06) && (*y > (550 - 50*Size)))
+        {
+        *ay = 0;
+        *vx = 0;
         }
 
     }
 
-void BirdControl(double* vx, double* vy)
+void BirdSpeed(double* vx, double* vy)
     {
-    if (txGetAsyncKeyState (VK_UP))    *vy +=1;
-    if (txGetAsyncKeyState (VK_DOWN))  *vy -=1;
+    if (txGetAsyncKeyState (VK_UP))    *vy -=1;
+    if (txGetAsyncKeyState (VK_DOWN))  *vy +=1;
     if (txGetAsyncKeyState (VK_LEFT))  *vx -=1;
     if (txGetAsyncKeyState (VK_RIGHT)) *vx +=1;
     }
@@ -259,4 +325,18 @@ void PigDraw (double x, double y, double Size)
 
     txSetFillColor (TX_RED);
     txCircle (x - 6*Size, y + 35*Size, 5*Size);
+    }
+
+void TabloScore (int* score)
+    {
+    txSetColor(TX_BLACK);
+    txSelectFont ("Arial Black", 30);
+    txTextOut (850, 25, "∆»«Ќ» : ");
+
+    char strScore [20] = "";
+    sprintf (strScore, "%d", *score);
+
+    txSetColor(TX_BROWN);
+    txSelectFont ("Arial Black", 30);
+    txTextOut (950, 25, strScore);
     }
