@@ -33,7 +33,6 @@ int main ()
     txCreateWindow (1000, 600);
 
     TitlesBegin();
-    GameMove();
 
     return 0;
     }
@@ -368,8 +367,7 @@ void TitlesBegin()
     txPlaySound ("sound/AngryBirds.wav");
     HDC BeginTitles  = txLoadImage ("images\\BeginTitles.bmp");
 
-    int t = 0;
-    while (!txGetAsyncKeyState (VK_LMENU))
+    while (!txGetAsyncKeyState (VK_RMENU))
         {
         txBitBlt (txDC(), 0, 0, 1000, 600, BeginTitles, 0, 0);
         CursorDraw (x, y);
@@ -385,7 +383,14 @@ void TitlesBegin()
         txSleep (50);
         }
     //COLORREF color = txFetPixel (x, y);
-
+    if (y == 385)
+        {
+        GameMove();
+        }
+    if (y == 505)
+        {
+        txMessageBox (" ŒÕ≈÷ »√–€");;
+        }
     txDeleteDC (BeginTitles);
     txSleep (3000);
     }
